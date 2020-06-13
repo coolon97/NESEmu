@@ -237,7 +237,7 @@ class CPU:
             op = self.registers.A ^ data
             self.registers.P["negative"] = bool(op & 0x80)
             self.registers.P["zero"] = not bool(op)
-            self.registers.A = eor & 0xFF
+            self.registers.A = op & 0xFF
             
         elif code in opcode.Base["INC"]:
             data = (self.read(operand) + 1) & 0xFF
@@ -276,39 +276,35 @@ class CPU:
             self.registers.A = op & 0xFF
 
         elif code in opcode.Base["ROL"]:
+            carry = self.registers.P["carry"]
             if mode == 'accum':
                 self.registers.P["carry"] = bool(self.registers.A & 0x80)
-                if self.registers.P["carry"]:
-                    self.registers.A = ((self.registers.A << 1) + 0x01) & 0xFF
-                else:
-                    self.registers.A = (self.registers.A << 1) & 0xFF
+                self.registers.A = ((self.registers.A << 1) + carry) & 0xFF
                 self.registers.P["zero"] = not bool(self.registers.A)
                 self.registers.P["negative"] = bool(self.registers.A & 0x80)
             else:
                 data = self.read(operand)
                 self.registers.P["carry"] = bool(data & 0x80)
-                if self.registers.P["carry"]:
-                    data = ((data << 1) + 0x01) & 0xFF
-                else:
-                    data = (data << 1) & 0xFF
+                data = ((data << 1) + carry) & 0xFF
                 self.registers.P["negative"] = bool(data & 0x80)
                 self.registers.P["zero"] = not bool(data)
                 self.write(data)
 
         elif code in opcode.Base["ROR"]:
+            carry = self.registers.P["carry"]
             if mode == 'accum':
                 self.registers.P["carry"] = bool(self.registers.A & 0x01)
-                if self.registers.P["carry"]:
+                if carry:
                     self.registers.A = ((self.registers.A >> 1) + 0x80) & 0xFF
                     self.registers.P["negative"] = True
                 else:
-                    self.registers.A = (self.registers.A >> 1) & 0xFF
+                    self.registers.A = (self.registers.A >> 1) & 0x7F
                     self.registers.P["negative"] = False
                 self.registers.P["zero"] = not bool(self.registers.A)
             else:
                 data = self.read(operand)
                 self.registers.P["carry"] = bool(data & 0x01)
-                if self.registers.P["carry"]:
+                if carry:
                     data = ((data >> 1) + 0x80) & 0xFF
                     self.registers.P["negative"] = True
                 else:
