@@ -2,9 +2,9 @@ class Nes:
     def __init__(self):
         print("OK")
 
-    def load(self, head, tail):
-        print("ProgramSize: " + head + "\nCharacterSize: " + tail)
+    def load(self, size):
+        if size:
+            print("OK")
 
     def start(self):
         print("OK")
-
