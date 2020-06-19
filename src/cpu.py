@@ -33,11 +33,14 @@ class CPU:
         self.registers.reset()
         self.registers.PC = self.read(0xFFFC)
 
+    def load(self, buf):
+        self.rom = buf
+
     def read(self, addr):
-        print('ok')
+        return self.rom[addr]
 
     def write(self, addr, data):
-        print('ok')
+        self.rom[addr] = data
         
     def push(self, data):
         self.write(0x100 | (self.registers.S & 0xFF), data)
@@ -423,6 +426,18 @@ class CPU:
         elif code in opcode.Base["NOP"]:
             pass
 
+        print('operation "' + code + '" has completed.')
+    
+    def run(self):
+        code = self.fetch()
+        cycle, mode = opcode.Cycles[code], opcode.Mode[code]
+        operand = self.fetchOperand(mode)
+        self.exec(code, operand, mode)
+        return cycle
+
+    def start(self):
+        while(True):
+            self.run()
 
 
 
