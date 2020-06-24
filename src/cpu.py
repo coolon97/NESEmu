@@ -23,9 +23,10 @@ class CPU:
                 "carry": False
             }
     
-    def __init__(self):
+    def __init__(self, bus):
         print('initialize...')
         self.registers = self.Registers()
+        self.bus = bus
         self.reset()
 
     def reset(self):
@@ -33,14 +34,11 @@ class CPU:
         self.registers.reset()
         self.registers.PC = self.read(0xFFFC)
 
-    def load(self, buf):
-        self.rom = buf
-
     def read(self, addr):
-        return self.rom[addr]
+        return self.bus.read(addr)
 
     def write(self, addr, data):
-        self.rom[addr] = data
+        self.bus.write(addr, data)
         
     def push(self, data):
         self.write(0x100 | (self.registers.S & 0xFF), data)
