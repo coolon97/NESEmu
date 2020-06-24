@@ -1,4 +1,4 @@
-class APU:
+class NesIO:
     def __init__(self):
         pass
 

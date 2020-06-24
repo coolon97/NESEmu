@@ -16,7 +16,7 @@ class BUS:
         elif addr == 0x4016:
             return self.io.read()
         elif addr >= 0xC000:
-            if self.rom.size <= 0x4000:
+            if self.rom.sizeOf() <= 0x4000:
                 return self.rom.read(addr - 0xC000)
             return self.rom.read(addr - 0x8000)
         elif addr >= 0x08000:

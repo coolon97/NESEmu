@@ -35,6 +35,8 @@ class CPU:
         self.registers.PC = self.read(0xFFFC)
 
     def read(self, addr):
+        if addr is None:
+            return
         return self.bus.read(addr)
 
     def write(self, addr, data):
@@ -63,15 +65,18 @@ class CPU:
         self.registers.P["zero"] = status & 0x02
         self.registers.P["carry"] = status & 0x01
 
-    def fetch(self, addr):
+    def branch(self, addr):
+        self.registers.PC = addr
+
+    def fetch(self):
         self.registers.PC += 1
         return self.read(self.registers.PC)
 
-    def fetchOpeland(self, addressing):
+    def fetchOperand(self, addressing):
         if addressing == 'accum':
-            return
+            return None
         elif addressing == 'impl':
-            return
+            return None
         elif addressing == 'immed':
             return self.fetch()
         elif addressing == 'zpg':
@@ -82,11 +87,22 @@ class CPU:
         elif addressing == 'zpgy':
             addr = self.fetch()
             return (addr + self.registers.Y) & 0xFF
+        elif addressing == 'rel':
+            addr = self.fetch()
+            return addr + addr + 0x01
+        elif addressing == 'abs':
+            addrL = self.fetch()
+            addrH = self.fetch() << 8
+            return (addrL | addrH) & 0xFF
         elif addressing == 'absx':
-            addr = self.fetchWord()
+            addrL = self.fetch()
+            addrH = self.fetch() << 8
+            addr = (addrL | addrH) & 0xFF
             return (addr + self.registers.X) & 0xFFFF
         elif addressing == 'absy':
-            addr = self.fetchWord()
+            addrL = self.fetch()
+            addrH = self.fetch() << 8
+            addr = (addrL | addrH) & 0xFF
             return (addr + self.registers.Y) & 0xFFFF
         elif addressing == 'xind':
             base = (self.fetch() + self.registers.X) & 0xFF
@@ -98,11 +114,13 @@ class CPU:
             addr = base + self.registers.Y
             return addr & 0xFFFF
         elif addressing == 'ind':
-            data = self.fetchWord()
+            data = self.fetch()
             addr = self.read(data) + (self.read((data & 0xFF00) | (((data & 0xFF) + 0x01) & 0xFF)) << 8)
             return addr & 0xFFFF
 
     def exec(self, code, operand, mode):
+        """print('operation {"' + str(hex(code))+'",' + ', mode:' + mode + '} start.')"""
+
         if code in opcode.Base["LDA"]:
             self.registers.A = operand if mode == 'immed' else self.read(operand)
             self.registers.P["negative"] = bool(self.registers.A & 0x80)
@@ -161,7 +179,7 @@ class CPU:
             data = operand if mode == 'immed' else self.read(operand) 
             op = self.registers.A + operand + self.registers.P["carry"]
             self.registers.P["negative"] = bool(op & 0x80)
-            self.registers.P["overflow"] = True if bool((self.registers ^ data) & 0x80) and bool((self.registers ^ self.registers.P["negative"]) & 0x80) != 0 else False
+            self.registers.P["overflow"] = (((self.registers.A ^ op) & 0x80) != 0 and ((self.registers.A ^ ~data) & 0x80) != 0)
             self.registers.P["carry"] = op > 0xFF
             self.registers.P["zero"] = not bool(op & 0xFF)
             self.registers.A = op & 0xFF
@@ -289,7 +307,7 @@ class CPU:
                 data = ((data << 1) + carry) & 0xFF
                 self.registers.P["negative"] = bool(data & 0x80)
                 self.registers.P["zero"] = not bool(data)
-                self.write(data)
+                self.write(operand, data)
 
         elif code in opcode.Base["ROR"]:
             carry = self.registers.P["carry"]
@@ -312,10 +330,10 @@ class CPU:
                     data = (data >> 1) & 0xFF
                     self.registers.P["negative"] = False
                 self.registers.P["zero"] = not bool(data)
-                self.write(data)
+                self.write(operand, data)
         
         elif code in opcode.Base["SBC"]:
-            data = operand if mode == 'immed' else self.read()
+            data = operand if mode == 'immed' else self.read(operand)
             op = (self.registers.A + ~data + (0xFF if self.registers.P["carry"] else 0x00))
             self.registers.P["overflow"] = (((self.registers.A ^ op) & 0x80) != 0 and ((self.registers.A ^ ~data) & 0x80) != 0)
             self.registers.A = op & 0xFF
@@ -418,13 +436,13 @@ class CPU:
             self.pushP()
             self.registers.P["interrupt"] = True
             if not interrupt:
-                self.registers.PC = self.read(0xFFFE, "Word")
+                self.registers.PC = self.read(0xFFFE)
             self.registers.PC -= 1
 
         elif code in opcode.Base["NOP"]:
             pass
 
-        print('operation "' + code + '" has completed.')
+        """print('operation "' + str(hex(code)) + '" has completed.')"""
     
     def run(self):
         code = self.fetch()
