@@ -179,7 +179,7 @@ BCS = 0xB0
 BNE = 0xD0
 BEQ = 0xF0
 
-Cycles = [
+CYCLES = [
    7, 6, 2, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
    2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 6, 7,
    6, 6, 2, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
@@ -198,7 +198,7 @@ Cycles = [
    2, 5, 2, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
 ]
 
-Mode = [
+MODE = [
     'impl', 'xind', 'impl', 'impl', 'impl', 'zpg', 'zpg', 'impl', 'impl', 'immed', 'accum', 'impl', 'impl', 'abs', 'abs', 'impl',
     'rel', 'indy', 'impl', 'impl', 'impl', 'zpgx', 'zpgx', 'impl', 'impl', 'absy', 'impl', 'impl', 'impl', 'absx', 'absx', 'impl',
     'abs', 'xind', 'impl', 'impl', 'zpg', 'zpg', 'zpg', 'impl', 'impl', 'immed', 'accum', 'impl', 'abs', 'abs', 'abs', 'impl',
@@ -217,7 +217,7 @@ Mode = [
     'rel', 'indy', 'impl', 'impl', 'impl', 'zpgx', 'zpgx', 'impl', 'impl', 'absy', 'impl', 'impl', 'impl', 'absx', 'absy', 'impl',
 ]
 
-Base = {
+BASE = {
     "LDA": [0xA9, 0xA5, 0xAD, 0xB5, 0xBD, 0xB9, 0xA1, 0xB1],
     "LDX": [0xA2, 0xA6, 0xAE, 0xB6, 0xBE],
     "LDY": [0xA0, 0xA4, 0xAC, 0xB4, 0xBC],
