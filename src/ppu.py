@@ -126,7 +126,7 @@ class PPU:
                 addr = spriteId * 16 + i
                 ram = self.readCharacterRAM(addr)
                 if bool(ram & (0x80 >> j)):
-                    sprite0[i % 8][j] += 0x01 << ~~(i / 8)
+                    sprite[i % 8][j] += 0x01 << ~~(i / 8)
         
         return sprite
 
@@ -138,6 +138,11 @@ class PPU:
         sprite = self.buildSprite(spriteId)
         return [sprite, paletteId]
 
-    def buildBackground():
-        pass
+    def buildBackground(self):
+        clampedTileY = self.tileY % 30
+        for x in range(32):
+            clampedTileX = x % 32
+            nameTableId = (~~(x / 32) % 2)
+            tile = self.buildTile(clampedTileX, clampedTileY)
+            self.background.push(tile)
 

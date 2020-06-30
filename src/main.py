@@ -1,6 +1,7 @@
 import parser
-import rom
 import nes
+import tkinter
+import sys
 
 r = []
 with open("../roms/sample1/sample1.nes", mode='rb') as nesFile:
@@ -9,3 +10,4 @@ with open("../roms/sample1/sample1.nes", mode='rb') as nesFile:
 n = nes.NES()
 n.load(r)
 n.start()
+
