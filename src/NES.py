@@ -56,11 +56,18 @@ if __name__ == "__main__":
 class UISmaple(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(UISmaple, self).__init__(parent)
-        self.resize(400, 300)
+        self.resize(320, 240)
+        self.scene = QtWidgets.QGraphicsScene()
+        self.scene.addItem()
+        self.view = QtWidgets.QGraphicsView(self.scene)
+        self.setCentralWidget(self.view)
+        
+    def flip(self):
+        pass
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     a = UISmaple()
     a.show()
-    sys.exit()
+    sys.exit(app.exec_())

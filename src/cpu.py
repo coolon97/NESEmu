@@ -1,4 +1,4 @@
-import opcode
+import oplist
 
 
 class CPU:
@@ -121,61 +121,61 @@ class CPU:
     def exec(self, code, operand, mode):
         """print('operation {"' + str(hex(code))+'",' + ', mode:' + mode + '} start.')"""
 
-        if code in opcode.BASE["LDA"]:
+        if code in oplist.BASE["LDA"]:
             self.registers.A = operand if mode == 'immed' else self.read(operand)
             self.registers.P["negative"] = bool(self.registers.A & 0x80)
             self.registers.P["zero"] = not bool(self.registers.A)
 
-        elif code in opcode.BASE["LDX"]:
+        elif code in oplist.BASE["LDX"]:
             self.registers.X = operand if mode == 'immed' else self.read(operand)
             self.registers.P["negative"] = bool(self.registers.X & 0x80)
             self.registers.P["zero"] = not bool(self.registers.X)
 
-        elif code in opcode.BASE["LDY"]:
+        elif code in oplist.BASE["LDY"]:
             self.registers.Y = operand if mode == 'immed' else self.read(operand)
             self.registers.P["negative"] = bool(self.registers.Y & 0x80)
             self.registers.P["zero"] = not bool(self.registers.Y)
 
-        elif code in opcode.BASE["STA"]:
+        elif code in oplist.BASE["STA"]:
             self.write(operand, self.registers.A)
         
-        elif code in opcode.BASE["STX"]:
+        elif code in oplist.BASE["STX"]:
             self.write(operand, self.registers.X)
         
-        elif code in opcode.BASE["STY"]:
+        elif code in oplist.BASE["STY"]:
             self.write(operand, self.registers.Y)
 
-        elif code in opcode.BASE["TAX"]:
+        elif code in oplist.BASE["TAX"]:
             self.registers.X = self.registers.A
             self.registers.P["negative"] = bool(self.registers.X & 0x80)
             self.registers.P["zero"] = not bool(self.registers.X)
 
-        elif code in opcode.BASE["TAY"]:
+        elif code in oplist.BASE["TAY"]:
             self.registers.Y = self.registers.A
             self.registers.P["negative"] = bool(self.registers.Y & 0x80)
             self.registers.P["zero"] = not bool(self.registers.Y)
 
-        elif code in opcode.BASE["TSX"]:
+        elif code in oplist.BASE["TSX"]:
             self.registers.X = self.registers.S
             self.registers.P["negative"] = bool(self.registers.X & 0x80)
             self.registers.P["zero"] = not bool(self.registers.X)
 
-        elif code in opcode.BASE["TXA"]:
+        elif code in oplist.BASE["TXA"]:
             self.registers.A = self.registers.X
             self.registers.P["negative"] = bool(self.registers.A & 0x80)
             self.registers.P["zero"] = not bool(self.registers.A)
 
-        elif code in opcode.BASE["TXS"]:
+        elif code in oplist.BASE["TXS"]:
             self.registers.S = self.registers.X
             self.registers.P["negative"] = bool(self.registers.S & 0x80)
             self.registers.P["zero"] = not bool(self.registers.S)
 
-        elif code in opcode.BASE["TYA"]:
+        elif code in oplist.BASE["TYA"]:
             self.registers.A = self.registers.Y
             self.registers.P["negative"] = bool(self.registers.A & 0x80)
             self.registers.P["zero"] = not bool(self.registers.A)
 
-        elif code in opcode.BASE["ADC"]:
+        elif code in oplist.BASE["ADC"]:
             data = operand if mode == 'immed' else self.read(operand) 
             op = self.registers.A + operand + self.registers.P["carry"]
             self.registers.P["negative"] = bool(op & 0x80)
@@ -184,14 +184,14 @@ class CPU:
             self.registers.P["zero"] = not bool(op & 0xFF)
             self.registers.A = op & 0xFF
         
-        elif code in opcode.BASE["AND"]:
+        elif code in oplist.BASE["AND"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.A & data
             self.registers.P["negative"] = bool(self.registers.A & 0x80)
             self.registers.P["zero"] = not bool(self.registers.A)
             self.registers.A = op & 0xFF
         
-        elif code in opcode.BASE["ASL"]:
+        elif code in oplist.BASE["ASL"]:
             if mode == 'accum':
                 acc = self.registers.A
                 self.registers.P["carry"] = bool(acc & 0x80)
@@ -206,75 +206,75 @@ class CPU:
                 self.registers.P["negative"] = bool(op & 0x80)
                 self.registers.P["zero"] = not bool(op)
 
-        elif code in opcode.BASE["BIT"]:
+        elif code in oplist.BASE["BIT"]:
             data = self.read(operand)
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["overflow"] = bool(data & 0x40)
             self.registers.P["zero"] = not bool(self.registers.A & data)
 
-        elif code in opcode.BASE["CMP"]:
+        elif code in oplist.BASE["CMP"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.A >= data
             self.registers.P["negative"] = op
             self.registers.P["zero"] = self.registers.A == data
             self.registers.P["carry"] = op
 
-        elif code in opcode.BASE["CPX"]:
+        elif code in oplist.BASE["CPX"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.X >= data
             self.registers.P["negative"] = op
             self.registers.P["zero"] = self.registers.X == data
             self.registers.P["carry"] = op
 
-        elif code in opcode.BASE["CPY"]:
+        elif code in oplist.BASE["CPY"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.Y >= data
             self.registers.P["negative"] = op
             self.registers.P["zero"] = self.registers.Y == data
             self.registers.P["carry"] = op
 
-        elif code in opcode.BASE["DEC"]:
+        elif code in oplist.BASE["DEC"]:
             data = (self.read(operand) + 0xFF) & 0xFF
             self.write(operand, data)
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
 
-        elif code in opcode.BASE["DEX"]:
+        elif code in oplist.BASE["DEX"]:
             data = (self.registers.X + 0xFF) & 0xFF
             self.registers.X = data
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
 
-        elif code in opcode.BASE["DEY"]:
+        elif code in oplist.BASE["DEY"]:
             data = (self.registers.Y + 0xFF) & 0xFF
             self.registers.Y = data
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
 
-        elif code in opcode.BASE["EOR"]:
+        elif code in oplist.BASE["EOR"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.A ^ data
             self.registers.P["negative"] = bool(op & 0x80)
             self.registers.P["zero"] = not bool(op)
             self.registers.A = op & 0xFF
             
-        elif code in opcode.BASE["INC"]:
+        elif code in oplist.BASE["INC"]:
             data = (self.read(operand) + 1) & 0xFF
             self.write(operand, data)
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
 
-        elif code in opcode.BASE["INX"]:
+        elif code in oplist.BASE["INX"]:
             self.registers.X = (self.registers.X + 1) & 0xFF
             self.registers.P["negative"] = bool(self.registers.X & 0x80)
             self.registers.P["zero"] = not bool(self.registers.X)
 
-        elif code in opcode.BASE["INY"]:
+        elif code in oplist.BASE["INY"]:
             self.registers.Y = (self.registers.Y + 1) & 0xFF
             self.registers.P["negative"] = bool(self.registers.Y & 0x80)
             self.registers.P["zero"] = not bool(self.registers.Y)
 
-        elif code in opcode.BASE["LSR"]:
+        elif code in oplist.BASE["LSR"]:
             if mode == 'accum':
                 self.registers.P["carry"] = bool(self.registers.A & 0x01)
                 self.registers.A = (self.registers.A >> 1) & 0xFF
@@ -287,14 +287,14 @@ class CPU:
                 self.write(operand, data)
             self.registers.P["negative"] = False
 
-        elif code in opcode.BASE["ORA"]:
+        elif code in oplist.BASE["ORA"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = self.registers.A | data
             self.registers.P["negative"] = bool(op & 0x80)
             self.registers.P["zero"] = not bool(op)
             self.registers.A = op & 0xFF
 
-        elif code in opcode.BASE["ROL"]:
+        elif code in oplist.BASE["ROL"]:
             carry = self.registers.P["carry"]
             if mode == 'accum':
                 self.registers.P["carry"] = bool(self.registers.A & 0x80)
@@ -309,7 +309,7 @@ class CPU:
                 self.registers.P["zero"] = not bool(data)
                 self.write(operand, data)
 
-        elif code in opcode.BASE["ROR"]:
+        elif code in oplist.BASE["ROR"]:
             carry = self.registers.P["carry"]
             if mode == 'accum':
                 self.registers.P["carry"] = bool(self.registers.A & 0x01)
@@ -332,7 +332,7 @@ class CPU:
                 self.registers.P["zero"] = not bool(data)
                 self.write(operand, data)
         
-        elif code in opcode.BASE["SBC"]:
+        elif code in oplist.BASE["SBC"]:
             data = operand if mode == 'immed' else self.read(operand)
             op = (self.registers.A + ~data + (0xFF if self.registers.P["carry"] else 0x00))
             self.registers.P["overflow"] = (((self.registers.A ^ op) & 0x80) != 0 and ((self.registers.A ^ ~data) & 0x80) != 0)
@@ -341,93 +341,93 @@ class CPU:
             self.registers.P["zero"] = not bool(self.registers.A)
             self.registers.P["carry"] = op >= 0xFF
 
-        elif code in opcode.BASE["PHA"]:
+        elif code in oplist.BASE["PHA"]:
             self.stack.push(self.registers.A)
 
-        elif code in opcode.BASE["PLA"]:
+        elif code in oplist.BASE["PLA"]:
             data = self.stack.pop()
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
             self.registers.A = data
 
-        elif code in opcode.BASE["PHP"]:
+        elif code in oplist.BASE["PHP"]:
             self.registers.P["break"] = True
             self.pushP()
 
-        elif code in opcode.BASE["PLP"]:
+        elif code in oplist.BASE["PLP"]:
             data = self.popP()
             self.registers.P["reserved"] = True
 
-        elif code in opcode.BASE["JMP"]:
+        elif code in oplist.BASE["JMP"]:
             self.registers.PC = operand
 
-        elif code in opcode.BASE["JSR"]:
+        elif code in oplist.BASE["JSR"]:
             pc = (self.registers.PC + 0xFF) & 0xFF
             self.push((pc >> 8) & 0xFF)
             self.push(pc & 0xFF)
             self.registers.PC = operand
 
-        elif code in opcode.BASE["RTS"]:
+        elif code in oplist.BASE["RTS"]:
             pc = self.pop()
             pc += (self.pop() << 8)
             self.registers.PC = pc
             self.registers.PC += 1
 
-        elif code in opcode.BASE["RTI"]:
+        elif code in oplist.BASE["RTI"]:
             self.popP()
             pc = self.pop()
             pc += (self.pop() << 8)
             self.registers.PC = pc
             self.registers.P.reserved = True
         
-        elif code in opcode.BASE["BCC"]:
+        elif code in oplist.BASE["BCC"]:
             if not self.registers.P["carry"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BCS"]:
+        elif code in oplist.BASE["BCS"]:
             if self.registers.P["carry"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BEQ"]:
+        elif code in oplist.BASE["BEQ"]:
             if self.registers.P["zero"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BMI"]:
+        elif code in oplist.BASE["BMI"]:
             if self.registers.P["negative"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BNE"]:
+        elif code in oplist.BASE["BNE"]:
             if not self.registers.P["zero"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BPL"]:
+        elif code in oplist.BASE["BPL"]:
             if not self.registers.P["negative"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["BVC"]:
+        elif code in oplist.BASE["BVC"]:
             if not self.registers.P["overflow"]:
                 self.branch(operand)
             
-        elif code in opcode.BASE["BVS"]:
+        elif code in oplist.BASE["BVS"]:
             if self.registers.P["overflow"]:
                 self.branch(operand)
 
-        elif code in opcode.BASE["CLC"]:
+        elif code in oplist.BASE["CLC"]:
             self.registers.P["carry"] = False
 
-        elif code in opcode.BASE["CLI"]:
+        elif code in oplist.BASE["CLI"]:
             self.registers.P["interrupt"] = False
 
-        elif code in opcode.BASE["CLV"]:
+        elif code in oplist.BASE["CLV"]:
             self.registers.P["overflow"] = False
         
-        elif code in opcode.BASE["SEC"]:
+        elif code in oplist.BASE["SEC"]:
             self.registers.P["carry"] = True
         
-        elif code in opcode.BASE["SEI"]:
+        elif code in oplist.BASE["SEI"]:
             self.registers.P["interrupt"] = True
 
-        elif code in opcode.BASE["BRK"]:
+        elif code in oplist.BASE["BRK"]:
             interrupt = self.registers.P["interrupt"]
             self.registers.PC += 1
             self.push((self.registers.PC >> 8) & 0xFF)
@@ -439,14 +439,14 @@ class CPU:
                 self.registers.PC = self.read(0xFFFE)
             self.registers.PC -= 1
 
-        elif code in opcode.BASE["NOP"]:
+        elif code in oplist.BASE["NOP"]:
             pass
 
         """print('operation "' + str(hex(code)) + '" has completed.')"""
     
     def run(self):
         code = self.fetch()
-        cycle, mode = opcode.Cycles[code], opcode.Mode[code]
+        cycle, mode = oplist.Cycles[code], oplist.Mode[code]
         operand = self.fetchOperand(mode)
         self.exec(code, operand, mode)
         return cycle
