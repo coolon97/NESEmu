@@ -9,6 +9,7 @@ import bus
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtUiTools import QUiLoader
 import sys
+import time
 
 
 class NES:
@@ -30,6 +31,7 @@ class NES:
         self.bus = bus.BUS(self.ram, self.rom, self.ppu, self.apu, self.io)
         self.cpu = cpu.CPU(self.bus)
         self.cpu.start()
+
 
 '''
 if __name__ == "__main__":
@@ -56,14 +58,26 @@ if __name__ == "__main__":
 class UISmaple(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(UISmaple, self).__init__(parent)
-        self.resize(320, 240)
+        self.img1 = QtGui.QImage('../assets/test.png')
+        self.img2 = QtGui.QImage('../assets/test.jpg')
+        self.png = QtGui.QPixmap.fromImage(self.img1)
+        self.one = 'one'
+        self.resize(640, 480)
         self.scene = QtWidgets.QGraphicsScene()
-        self.scene.addItem()
+        self.scene.addPixmap(self.png)
         self.view = QtWidgets.QGraphicsView(self.scene)
         self.setCentralWidget(self.view)
-        
+
     def flip(self):
-        pass
+        if self.one == 'one':
+            self.one = 'two'
+            self.png = QtGui.QPixmap.fromImage(self.img2)
+
+        else:
+            self.one = 'one'
+            self.png = QtGui.QPixmap.fromImage(self.img1)
+
+        self.show()
 
 
 if __name__ == "__main__":
