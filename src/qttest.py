@@ -10,7 +10,7 @@ class UISmaple(QtWidgets.QDialog):
         self.img1 = QtGui.QImage('../assets/test.png')
         self.img2 = QtGui.QImage('../assets/test.jpg')
         self.img = self.img1
-        self.button1 = QtWidgets.QPushButton('TEST')
+        self.button1 = QtWidgets.QPushButton('TEST1')
         self.button2 = QtWidgets.QPushButton('TEST2')
         self.viewer = QtWidgets.QLabel()
         self.viewer.setPixmap(QtGui.QPixmap.fromImage(self.img))
