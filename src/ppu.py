@@ -137,3 +137,6 @@ class PPU:
         paletteId = (attr >> (blockId * 2)) & 0x03
         sprite = self.buildSprite(spriteId)
         return [sprite, paletteId]
+
+    def readCharacterROM(addr):
+        pass
