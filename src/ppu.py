@@ -124,7 +124,7 @@ class PPU:
         for i in range(16):
             for j in range(8):
                 addr = spriteId * 16 + i
-                ram = self.readCharacterRAM(addr)
+                ram = self.readCharacterROM(addr)
                 if bool(ram & (0x80 >> j)):
                     sprite[i % 8][j] += 0x01 << ~~(i / 8)
         
