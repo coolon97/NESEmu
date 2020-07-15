@@ -140,3 +140,4 @@ class PPU:
 
     def readCharacterROM(addr):
         pass
+        pass
