@@ -23,16 +23,15 @@ class BUS:
             return self.rom.read(addr - 0x8000)
         else:
             return 0
-        
+
     def write(self, addr, data):
         if addr < 0x0800:
             return self.ram.write(addr, data)
         elif addr < 0x2000:
             return self.ram.write(addr - 0x0800, data)
-        elif addr < 0x2008:
+        elif addr < 0x4008:
             return self.ppu.write((addr - 0x2000), data)
         elif addr == 0x4016:
             return self.io.write()
         else:
             self.apu.write(addr - 0x4000, data)
-
