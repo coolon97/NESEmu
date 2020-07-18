@@ -53,6 +53,8 @@
   |  0   | Display type      0: color, 1: mono         |
   */
 """
+import numpy as np
+
 
 COLORS = [
     [0x80, 0x80, 0x80], [0x00, 0x3D, 0xA6], [
@@ -90,13 +92,9 @@ COLORS = [
 ]
 
 
-class PPU:
-    class Registers:
-        def __init__(self):
-            self.reset()
-
-        def reset(self):
-            self.registers = {
+class PPU:            
+    def __init__(self):
+        self.registers = {
                 "PPUCTRL": False,
                 "PPUMASK": False,
                 "PPUSTATUS": False,
@@ -105,17 +103,16 @@ class PPU:
                 "PPUSCROLL": False,
                 "PPUADDR": False,
                 "PPUDATA": False
-            }
-
-    def __init__(self):
-        pass
+        }
+        self.ram = [0]*0xFFFF
+        self.view = np.zeros((254, 240))
 
     def read(self, addr):
-
-        return 0x0001
-
+        return self.registers.values()[addr]
+    
     def write(self, addr, data):
-        pass
+        self.registers.values()[(addr-0x2000) % 8] = bool(data)
+        print(self.registers.values())
 
     def run(self, cycle):
         self.cycles += cycle
@@ -136,6 +133,8 @@ class PPU:
                     "palette": self.getPallete()
                 }
 
+    def buildBackground():
+        pass
     def buildSprite(self, spriteId):
         sprite = [[0 for y in range(8)] for x in range(8)]
         for i in range(16):
