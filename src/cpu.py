@@ -342,10 +342,10 @@ class CPU:
             self.registers.P["carry"] = op >= 0xFF
 
         elif code in oplist.BASE["PHA"]:
-            self.stack.push(self.registers.A)
+            self.push(self.registers.A)
 
         elif code in oplist.BASE["PLA"]:
-            data = self.stack.pop()
+            data = self.pop()
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
             self.registers.A = data
@@ -446,7 +446,7 @@ class CPU:
     
     def run(self):
         code = self.fetch()
-        cycle, mode = oplist.Cycles[code], oplist.Mode[code]
+        cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
         operand = self.fetchOperand(mode)
         self.exec(code, operand, mode)
         return cycle
