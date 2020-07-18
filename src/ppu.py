@@ -155,18 +155,6 @@ class PPU:
         sprite = self.buildSprite(spriteId)
         return [sprite, paletteId]
 
-
-<< << << < HEAD
-
-
-def buildBackground(self):
-    clampedTileY = self.tileY % 30
-    for x in range(32):
-        clampedTileX = x % 32
-        nameTableId = (~~(x / 32) % 2)
-        tile = self.buildTile(clampedTileX, clampedTileY)
-        self.background.push(tile)
-
-
-== == == =
->>>>>> > c8db093832bb58a482adf41678c692813c5abbea
+    def readCharacterROM(addr):
+        pass
+        pass
