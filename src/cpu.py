@@ -353,7 +353,7 @@ class CPU:
             self.push(self.registers.A)
 
         elif code in oplist.BASE["PLA"]:
-            data = self.stack.pop()
+            data = self.pop()
             self.registers.P["negative"] = bool(data & 0x80)
             self.registers.P["zero"] = not bool(data)
             self.registers.A = data
