@@ -115,7 +115,6 @@ class PPU:
         return 0x0001
 
     def write(self, addr, data):
-        print('ok')
         pass
 
     def run(self, cycle):
@@ -142,7 +141,7 @@ class PPU:
         for i in range(16):
             for j in range(8):
                 addr = spriteId * 16 + i
-                ram = self.readCharacterRAM(addr)
+                ram = self.readCharacterROM(addr)
                 if bool(ram & (0x80 >> j)):
                     sprite[i % 8][j] += 0x01 << ~~(i / 8)
 
@@ -156,10 +155,18 @@ class PPU:
         sprite = self.buildSprite(spriteId)
         return [sprite, paletteId]
 
-    def buildBackground(self):
-        clampedTileY = self.tileY % 30
-        for x in range(32):
-            clampedTileX = x % 32
-            nameTableId = (~~(x / 32) % 2)
-            tile = self.buildTile(clampedTileX, clampedTileY)
-            self.background.push(tile)
+
+<< << << < HEAD
+
+
+def buildBackground(self):
+    clampedTileY = self.tileY % 30
+    for x in range(32):
+        clampedTileX = x % 32
+        nameTableId = (~~(x / 32) % 2)
+        tile = self.buildTile(clampedTileX, clampedTileY)
+        self.background.push(tile)
+
+
+== == == =
+>>>>>> > c8db093832bb58a482adf41678c692813c5abbea
