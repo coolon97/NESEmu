@@ -108,8 +108,19 @@ class PPU:
         self.view = np.zeros((254, 240))
 
     def read(self, addr):
+<<<<<<< HEAD
         return self.registers.values()[addr]
     
+=======
+<<<<<<< HEAD
+        return self.registers.values()[addr]
+    
+=======
+
+        return 0x0001
+
+>>>>>>> 50d8d40705789e46765ac6746ea5285e92ac6da0
+>>>>>>> ppu
     def write(self, addr, data):
         self.registers.values()[(addr-0x2000) % 8] = bool(data)
         print(self.registers.values())
@@ -133,8 +144,7 @@ class PPU:
                     "palette": self.getPallete()
                 }
 
-    def buildBackground():
-        pass
+
     def buildSprite(self, spriteId):
         sprite = [[0 for y in range(8)] for x in range(8)]
         for i in range(16):
