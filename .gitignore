@@ -3,3 +3,4 @@
 roms/
 assets/
 *.pyc
+/__pychache__
