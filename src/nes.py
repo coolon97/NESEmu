@@ -5,9 +5,8 @@ import nesio
 import ppu
 import apu
 import bus
-'''import pygame'''
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2.QtUiTools import QUiLoader
+#from PySide2 import QtCore, QtGui, QtWidgets
+#from PySide2.QtUiTools import QUiLoader
 import sys
 import time
 
@@ -19,13 +18,13 @@ class NES:
     def reset(self):
         self.io = nesio.NesIO()
         self.ram = ram.RAM()
-        self.ppu = ppu.PPU()
         self.apu = apu.APU()
         self.rom = False
         self.cpu = False
 
     def load(self, data):
-        self.rom = rom.ROM(data)
+        self.rom = rom.ROM(data[0])
+        self.ppu = ppu.PPU(data[1])
 
     def start(self):
         self.bus = bus.BUS(self.ram, self.rom, self.ppu, self.apu, self.io)
@@ -54,7 +53,7 @@ if __name__ == "__main__":
                 sys.exit()
 '''
 
-
+'''
 class UISmaple(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super(UISmaple, self).__init__(parent)
@@ -85,3 +84,4 @@ if __name__ == "__main__":
     a = UISmaple()
     a.show()
     sys.exit(app.exec_())
+'''

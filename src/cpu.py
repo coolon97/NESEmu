@@ -464,10 +464,11 @@ class CPU:
         code = self.fetch()
         cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
         operand = self.fetchOperand(mode)
-        if self.registers.PC <= 300:
-            print(self.registers.PC)
-            print('operation {"' + str(hex(code)) + '", mode:' + mode + ', operand:' +
-                  ("None" if operand is None else str(hex(operand))) + '} start.')
+        if self.registers.PC <= 1000:
+            pass
+            #print(self.registers.PC)
+            #print('operation {"' + str(hex(code)) + '", mode:' + mode + ', operand:' +
+            #      ("None" if operand is None else str(hex(operand))) + '} start.')
         self.exec(code, operand, mode)
 
         return cycle
