@@ -79,15 +79,18 @@ COLORS = [
 class PPU:            
     def __init__(self, characterRom):
         self.characterRom = characterRom
+        self.reset()
+
+    def reset(self):
         self.registers = {
-                "PPUCTRL": False,
-                "PPUMASK": False,
-                "PPUSTATUS": False,
-                "OAMADDR": False,
-                "OMADATA": False,
-                "PPUSCROLL": False,
-                "PPUADDR": False,
-                "PPUDATA": False
+                "PPUCTRL": 0x00,
+                "PPUMASK": 0x00,
+                "PPUSTATUS": 0x00,
+                "OAMADDR": 0x00,
+                "OMADATA": 0x00,
+                "PPUSCROLL": 0x00,
+                "PPUADDR": 0x00,
+                "PPUDATA": 0x00
         }
         self.cycles = 0
         self.line = 0
@@ -103,19 +106,13 @@ class PPU:
 
     def run(self, cycle):
         self.cycles += cycle
-        if self.line == 0:
-            self.background.length = 0
-
         if self.cycles >= 341:
             self.cycles -= 341
             self.line += 1
 
-            if self.line <= 240 and self.line % 8 == 0:
-                self.buildBackground()
-
             if self.line == 262:
                 self.line = 0
-                return self.background
+                return self.buildBackground()
 
     def buildSprite(self, spriteId):
         sprite = np.zeros((8,8)).astype(np.uint8)
