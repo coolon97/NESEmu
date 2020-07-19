@@ -130,7 +130,6 @@ class PPU:
             for j in range(0, 240, 16):
                 self.background[i:i+16, j:j+16] = self.buildTile(i, j)
 
-
     def buildTile(self, tileX, tileY):
         tile = np.zeros((16,16,3))
         for i in range(4):
