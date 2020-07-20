@@ -21,6 +21,7 @@ class NES:
         self.apu = apu.APU()
         self.rom = False
         self.cpu = False
+        self.cycles = 0
 
     def load(self, data):
         self.rom = rom.ROM(data[0])
@@ -29,7 +30,48 @@ class NES:
     def start(self):
         self.bus = bus.BUS(self.ram, self.rom, self.ppu, self.apu, self.io)
         self.cpu = cpu.CPU(self.bus)
-        self.cpu.start()
+
+        while(True):
+            self.cycles = self.cpu.run()
+            background = self.ppu.run(self.cycles * 3)
+            if background is not None:
+                print("OK!")
+
+    def debug(self):
+        def printRegister():
+            print("RegisterA: " + str(self.cpu.registers.A))
+            print("RegisterX: "+ str(self.cpu.registers.X))
+            print("RegisterY: "+ str(self.cpu.registers.Y))
+            print("RegisterS: "+ str(self.cpu.registers.S))
+            print("RegisterP: "+ str(self.cpu.registers.P))
+            print("RegisterPC: "+str(self.cpu.registers.PC)+"\n")
+
+        self.bus = bus.BUS(self.ram, self.rom, self.ppu, self.apu, self.io)
+        self.cpu = cpu.CPU(self.bus)
+
+        msg = ''
+        while(True):
+            argv = input("(debug) cmd: ").split(" ")
+            argc = len(argv)
+
+            if argv[0] == "run":
+                if argc>1:
+                    for i in range(int(argv[1])):
+                        msg = self.cpu.run()
+                    print(msg)
+                    printRegister()
+                else:
+                    msg = self.cpu.run()
+                    print(msg)
+                    printRegister()
+                    
+            if argv[0] == "register":
+                printRegister()
+
+            if argv[0] == "quit":
+                exit()
+            
+
 
 
 '''

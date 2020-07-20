@@ -4,3 +4,4 @@ roms/
 assets/
 *.pyc
 /__pycache__
+png.py

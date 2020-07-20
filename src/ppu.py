@@ -83,8 +83,8 @@ class PPU:
 
     def reset(self):
         self.registers = {
-                "PPUCTRL": 0x00,
-                "PPUMASK": 0x00,
+                "PPUCTRL": 0x40,
+                "PPUMASK": 0x10,
                 "PPUSTATUS": 0x00,
                 "OAMADDR": 0x00,
                 "OMADATA": 0x00,
@@ -94,15 +94,23 @@ class PPU:
         }
         self.cycles = 0
         self.line = 0
+        self.iobuf = 0x00
         self.vram = [0]*0xFFFF
-        self.background = np.zeros((254, 240, 3)).astype(np.uint8)
+        self.background = np.zeros((240 ,256, 3)).astype(np.uint8)
+        self.fps = 0
 
     def read(self, addr):
-        return self.registers.values()[addr]
+        if addr==0x06:
+            return self.vram[self.iobuf]
+        return list(self.registers.values())[addr]
 
     def write(self, addr, data):
-        self.registers.values()[(addr-0x2000) % 8] = bool(data)
-        print(self.registers.values())
+        if addr==0x06:
+            self.iobuf = ((self.iobuf << 8) + data) & 0xFFFF
+            if data!=0x00:
+                self.vram[self.iobuf] = data
+            return 
+        list(self.registers.values())[addr % 8] = bool(data)
 
     def run(self, cycle):
         self.cycles += cycle
@@ -112,7 +120,15 @@ class PPU:
 
             if self.line == 262:
                 self.line = 0
+                self.fps += 1
+                if self.fps >= 60:
+                    import png
+                    p = png.Png()
+                    p.write_binary(self.buildBackground(), 256, 240)
+                    exit()
                 return self.buildBackground()
+
+        return None
 
     def buildSprite(self, spriteId):
         sprite = np.zeros((8,8)).astype(np.uint8)
@@ -126,12 +142,12 @@ class PPU:
         return sprite
 
     def buildBackground(self):
-        for i in range(0, 256, 16):
-            for j in range(0, 240, 16):
+        for i in range(0, 240, 16):
+            for j in range(0, 256, 16):
                 self.background[i:i+16, j:j+16] = self.buildTile(i, j)
 
     def buildTile(self, tileX, tileY):
-        tile = np.zeros((16,16,3))
+        tile = np.zeros((16,16,3)).astype(np.uint8)
         for i in range(4):
             spriteId = self.getSpriteId(tileX, tileY)
             attr = self.getAttribute(tileX, tileY)
@@ -149,13 +165,13 @@ class PPU:
     def getPalette(self, paletteId):
         return self.vram[0x3F00+0x04*paletteId:0x3F00+0x04*paletteId+0x04]
 
-    def applyPalette(self, paletteId, sprite):
+    def applyPalette(self, sprite, paletteId):
         palette = self.getPalette(paletteId)
-        applied = np.zeros((8,8,3))
+        applied = np.zeros((8,8,3)).astype(np.uint8)
         for i in range(8):
             for j in range(8):
                 applied[i, j] = COLORS[palette[sprite[i, j]]]
-        return sprite
+        return applied
 
     def readCharacterROM(self, addr):
         return self.characterRom[addr]

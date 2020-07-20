@@ -10,7 +10,7 @@ class CPU:
             self.A = 0x00
             self.X = 0x00
             self.Y = 0x00
-            self.S = 0x00
+            self.S = 0x01FF
             self.PC = 0x0000
             self.P = {
                 "negative": False,
@@ -32,7 +32,7 @@ class CPU:
     def reset(self):
         print('cpu reset...')
         self.registers.reset()
-        self.registers.PC = self.read(0xFFFC)
+        self.registers.PC = (((self.read(0xFFFD) << 8) | self.read(0xFFFC)) & 0xFFFF ) - 1
 
     def read(self, addr):
         if addr == None:
@@ -57,14 +57,14 @@ class CPU:
 
     def popP(self):
         status = self.pop()
-        self.registers.P["negative"] = status & 0x80
-        self.registers.P["overflow"] = status & 0x40
-        self.registers.P["reserved"] = status & 0x20
-        self.registers.P["break"] = status & 0x10
-        self.registers.P["decimal"] = status & 0x08
-        self.registers.P["interrupt"] = status & 0x04
-        self.registers.P["zero"] = status & 0x02
-        self.registers.P["carry"] = status & 0x01
+        self.registers.P["negative"] = bool(status & 0x80)
+        self.registers.P["overflow"] = bool(status & 0x40)
+        self.registers.P["reserved"] = bool(status & 0x20)
+        self.registers.P["break"] = bool(status & 0x10)
+        self.registers.P["decimal"] = bool(status & 0x08)
+        self.registers.P["interrupt"] = bool(status & 0x04)
+        self.registers.P["zero"] = bool(status & 0x02)
+        self.registers.P["carry"] = bool(status & 0x01)
 
     def branch(self, addr):
         self.registers.PC = addr
@@ -84,35 +84,35 @@ class CPU:
             return self.fetch()
         elif addressing == 'zpgx':
             addr = self.fetch()
-            return (addr + self.registers.X) & 0xFF
+            return (addr + self.registers.X) & 0xFFFF
         elif addressing == 'zpgy':
             addr = self.fetch()
-            return (addr + self.registers.Y) & 0xFF
+            return (addr + self.registers.Y) & 0xFFFF
         elif addressing == 'rel':
             addr = self.fetch()
-            return addr + addr + 0x01
+            return self.registers.PC + (addr if addr<=0x7F else addr-256) 
         elif addressing == 'abs':
-            addrL = self.fetch()
+            addrL = self.fetch() 
             addrH = self.fetch() << 8
-            return (addrL | addrH) & 0xFF
+            return (addrL | addrH) & 0xFFFF
         elif addressing == 'absx':
             addrL = self.fetch()
             addrH = self.fetch() << 8
-            addr = (addrL | addrH) & 0xFF
+            addr = (addrL | addrH) & 0xFFFF
             return (addr + self.registers.X) & 0xFFFF
         elif addressing == 'absy':
             addrL = self.fetch()
             addrH = self.fetch() << 8
-            addr = (addrL | addrH) & 0xFF
+            addr = (addrL | addrH) & 0xFFFF
             return (addr + self.registers.Y) & 0xFFFF
         elif addressing == 'xind':
             self.registers.PC += 1
-            base = (self.read(self.registers.PC) + self.registers.X) & 0xFF
-            addr = self.read(base) + (self.read(base + 0x01) & 0xFF) << 8
+            base = (self.read(self.registers.PC) + self.registers.X) & 0xFFFF
+            addr = self.read(base) + (self.read(base + 0x01) & 0xFFFF) << 8
             return addr & 0xFFFF
         elif addressing == 'indy':
             data = self.fetch()
-            base = self.read(data) + (self.read((data + 0x01) & 0xFF) << 8)
+            base = (self.read(data) << 8) + self.read(data + 0x01) & 0xFFFF
             addr = base + self.registers.Y
             return addr & 0xFFFF
         elif addressing == 'ind':
@@ -162,7 +162,7 @@ class CPU:
             self.registers.P["zero"] = not bool(self.registers.Y)
 
         elif code in oplist.BASE["TSX"]:
-            self.registers.X = self.registers.S
+            self.registers.X = self.registers.S & 0xFF
             self.registers.P["negative"] = bool(self.registers.X & 0x80)
             self.registers.P["zero"] = not bool(self.registers.X)
 
@@ -172,7 +172,7 @@ class CPU:
             self.registers.P["zero"] = not bool(self.registers.A)
 
         elif code in oplist.BASE["TXS"]:
-            self.registers.S = self.registers.X
+            self.registers.S = (0x0100 | self.registers.X) & 0xFFFF
             self.registers.P["negative"] = bool(self.registers.S & 0x80)
             self.registers.P["zero"] = not bool(self.registers.S)
 
@@ -359,18 +359,16 @@ class CPU:
             self.registers.A = data
 
         elif code in oplist.BASE["PHP"]:
-            self.registers.P["break"] = True
             self.pushP()
 
         elif code in oplist.BASE["PLP"]:
-            data = self.popP()
-            self.registers.P["reserved"] = True
+            self.popP()
 
         elif code in oplist.BASE["JMP"]:
-            self.registers.PC = operand
+            self.registers.PC = operand - 1
 
         elif code in oplist.BASE["JSR"]:
-            pc = (self.registers.PC + 0xFF) & 0xFF
+            pc = self.registers.PC
             self.push((pc >> 8) & 0xFF)
             self.push(pc & 0xFF)
             self.registers.PC = operand
@@ -385,32 +383,24 @@ class CPU:
             self.popP()
             pc = self.pop()
             pc += (self.pop() << 8)
-            self.registers.PC = pc
+            self.registers.PC = pc & 0xFFFF
             self.registers.P["reserved"] = True
 
         elif code in oplist.BASE["BCC"]:
             if not self.registers.P["carry"]:
                 self.branch(operand)
-            else:
-                self.registers.PC += 1
 
         elif code in oplist.BASE["BCS"]:
             if self.registers.P["carry"]:
                 self.branch(operand)
-            else:
-                self.registers.PC += 1
 
         elif code in oplist.BASE["BEQ"]:
             if self.registers.P["zero"]:
                 self.branch(operand)
-            else:
-                self.registers.PC += 1
 
         elif code in oplist.BASE["BMI"]:
             if self.registers.P["negative"]:
                 self.branch(operand)
-            else:
-                self.registers.PC += 1
 
         elif code in oplist.BASE["BNE"]:
             if not self.registers.P["zero"]:
@@ -427,8 +417,6 @@ class CPU:
         elif code in oplist.BASE["BVS"]:
             if self.registers.P["overflow"]:
                 self.branch(operand)
-            else:
-                self.registers.PC += 1
 
         elif code in oplist.BASE["CLC"]:
             self.registers.P["carry"] = False
@@ -447,30 +435,32 @@ class CPU:
 
         elif code in oplist.BASE["BRK"]:
             interrupt = self.registers.P["interrupt"]
-            self.registers.PC += 1
-            self.push((self.registers.PC >> 8) & 0xFF)
-            self.push(self.registers.PC & 0xFF)
-            self.registers.P["break"] = True
-            self.pushP()
-            self.registers.P["interrupt"] = True
             if not interrupt:
-                self.registers.PC = self.read(0xFFFE)
-            self.registers.PC -= 1
+                self.registers.P["break"] = True
+                self.registers.PC += 1
+                self.push((self.registers.PC >> 8) & 0xFF)
+                self.push(self.registers.PC & 0xFF)
+                self.pushP()
+                self.registers.P["interrupt"] = True
+                self.registers.PC = ((self.read(0xFFFF) << 8) | self.read(0xFFFE)) & 0xFFFF
 
         elif code in oplist.BASE["NOP"]:
             pass
 
     def run(self):
+        codename = ''
         code = self.fetch()
-        cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
+        #cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
+        cycle = oplist.CYCLES[code]
+        mode = oplist.MODE[code]
         operand = self.fetchOperand(mode)
-        if self.registers.PC <= 1000:
-            pass
-            #print(self.registers.PC)
-            #print('operation {"' + str(hex(code)) + '", mode:' + mode + ', operand:' +
-            #      ("None" if operand is None else str(hex(operand))) + '} start.')
+        for key in oplist.BASE.keys():
+            if code in oplist.BASE[key]:
+                codename = key
+        if codename == '':
+            codename = "NOP"
         self.exec(code, operand, mode)
-
+        #return 'operation {"' + codename + '", mode:' + mode + ', operand:' + ("None" if operand is None else str(hex(operand))) + '}.'
         return cycle
 
     def start(self):
