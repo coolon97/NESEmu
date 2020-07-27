@@ -5,3 +5,4 @@ assets/
 *.pyc
 /__pycache__
 png.py
+png_b.png

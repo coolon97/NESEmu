@@ -9,6 +9,7 @@ import bus
 #from PySide2.QtUiTools import QUiLoader
 import sys
 import time
+import ncpu
 
 
 class NES:
@@ -24,18 +25,36 @@ class NES:
         self.cycles = 0
 
     def load(self, data):
-        self.rom = rom.ROM(data[0])
         self.ppu = ppu.PPU(data[1])
+        self.rom = rom.ROM(data[0])
+        
+    def nload(self, data):
+        self.ppu = ppu.PPU(data[1])
+        self.cpu = ncpu.CPU(self.ppu)
+        self.cpu.load(data[0])
 
     def start(self):
+        c = 0
         self.bus = bus.BUS(self.ram, self.rom, self.ppu, self.apu, self.io)
         self.cpu = cpu.CPU(self.bus)
+        for i in range(1000000):
+            c += self.cpu.run()
+            if c > 28000*60:
+                print("NES got 60 fps lol")
+                exit()
 
-        while(True):
-            self.cycles = self.cpu.run()
-            background = self.ppu.run(self.cycles * 3)
-            if background is not None:
-                print("OK!")
+    
+    def nstart(self):
+        c = 0
+        start = time.time()
+        for i in range(1000000):
+           c += self.cpu.run()
+           if c > 28000:
+               end = time.time()
+               print("1Frame took " + str(end - start) +" sec.")
+               start = time.time()
+               c = 0
+
 
     def debug(self):
         def printRegister():
@@ -56,12 +75,51 @@ class NES:
 
             if argv[0] == "run":
                 if argc>1:
+                    import time
+                    start = time.time()
                     for i in range(int(argv[1])):
-                        msg = self.cpu.run()
+                        msg = self.cpu.debugRun()
+                    end = time.time()
                     print(msg)
                     printRegister()
+                    print("operation took " + str(end - start) + " secs")
                 else:
-                    msg = self.cpu.run()
+                    msg = self.cpu.debugRun()
+                    print(msg)
+                    printRegister()
+                    
+            if argv[0] == "register":
+                printRegister()
+
+            if argv[0] == "quit":
+                exit()
+    
+    def ndebug(self):
+        def printRegister():
+            print("RegisterA: " + str(self.cpu.A))
+            print("RegisterX: "+ str(self.cpu.X))
+            print("RegisterY: "+ str(self.cpu.Y))
+            print("RegisterS: "+ str(self.cpu.S))
+            print("RegisterP: "+ str(self.cpu.P))
+            print("RegisterPC: "+str(self.cpu.PC)+"\n")
+
+        msg = ''
+        while(True):
+            argv = input("(debug) cmd: ").split(" ")
+            argc = len(argv)
+
+            if argv[0] == "run":
+                if argc>1:
+                    import time
+                    start = time.time()
+                    for i in range(int(argv[1])):
+                        msg = self.cpu.debugRun()
+                    end = time.time()
+                    print(msg)
+                    printRegister()
+                    print("operation took " + str(end - start) + " secs")
+                else:
+                    msg = self.cpu.debugRun()
                     print(msg)
                     printRegister()
                     

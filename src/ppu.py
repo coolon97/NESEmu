@@ -53,7 +53,7 @@
   |  0   | Display type      0: color, 1: mono         |
   */
 """
-import numpy as np
+#import numpy as np
 
 
 COLORS = [
@@ -96,7 +96,7 @@ class PPU:
         self.line = 0
         self.iobuf = 0x00
         self.vram = [0]*0xFFFF
-        self.background = np.zeros((240 ,256, 3)).astype(np.uint8)
+        #self.background = np.zeros((240 ,256, 3)).astype(np.uint8)
         self.fps = 0
 
     def read(self, addr):

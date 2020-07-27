@@ -122,8 +122,6 @@ class CPU:
             return addr & 0xFFFF
 
     def exec(self, code, operand, mode):
-        """print('operation {"' + str(hex(code))+'",' + ', mode:' + mode + '} start.')"""
-
         if code in oplist.BASE["LDA"]:
             self.registers.A = operand if mode == 'immed' else self.read(
                 operand)
@@ -371,7 +369,7 @@ class CPU:
             pc = self.registers.PC
             self.push((pc >> 8) & 0xFF)
             self.push(pc & 0xFF)
-            self.registers.PC = operand
+            self.registers.PC = operand - 1
 
         elif code in oplist.BASE["RTS"]:
             pc = self.pop()
@@ -448,10 +446,15 @@ class CPU:
             pass
 
     def run(self):
+        code = self.fetch()
+        cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
+        operand = self.fetchOperand(mode)
+        self.exec(code, operand, mode)
+        return cycle
+    
+    def debugRun(self):
         codename = ''
         code = self.fetch()
-        #cycle, mode = oplist.CYCLES[code], oplist.MODE[code]
-        cycle = oplist.CYCLES[code]
         mode = oplist.MODE[code]
         operand = self.fetchOperand(mode)
         for key in oplist.BASE.keys():
@@ -460,9 +463,13 @@ class CPU:
         if codename == '':
             codename = "NOP"
         self.exec(code, operand, mode)
-        #return 'operation {"' + codename + '", mode:' + mode + ', operand:' + ("None" if operand is None else str(hex(operand))) + '}.'
-        return cycle
+        return 'operation {"' + str(hex(code)) + '", mode:' + mode + ', operand:' + ("None" if operand is None else str(hex(operand))) + '}.'
 
     def start(self):
+        count = 0
         while(True):
+            count += 1
             self.run()
+            if count > 500000:
+                print("ok")
+                count = 0
