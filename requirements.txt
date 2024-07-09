@@ -11,4 +11,4 @@ pylint==2.4.3
 PySimpleGUI==4.22.0
 typed-ast==1.4.0
 wrapt==1.11.2
-zipp==3.1.0
+zipp==3.19.1
